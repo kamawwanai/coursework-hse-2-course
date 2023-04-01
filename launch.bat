@@ -1,0 +1,1 @@
+cd .\\build\\install\\bin && .\\course-work.exe

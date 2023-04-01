@@ -11,12 +11,12 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "meson compile -C build"
+            "command": "meson install -C build --destdir .\\install"
         },
         {
             "label": "launch",
             "type": "shell",
-            "command": ".\\build\\learning_gl.exe"
+            "command": "./launch.bat"
         }
     ]
 }
