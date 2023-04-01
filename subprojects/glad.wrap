@@ -1,0 +1,5 @@
+[wrap-file]
+directory = glad
+
+[provide]
+glad = glad_dep

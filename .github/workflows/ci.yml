@@ -1,0 +1,15 @@
+name: build checker
+
+on: push
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Dependencies
+        run: sudo apt install -y meson ninja-build build-essential libglfw3 libglfw3-dev
+      - name: Configure
+        run: meson setup build
+      - name: Build
+        run: meson compile -C build
