@@ -18,6 +18,7 @@ deps += dependency('glfw3',
 )
 deps += dependency('glad')
 deps += dependency('glm')
+deps += dependency('stb_image')
 
 sources = []
 sources += './sources/course_work.cpp'
