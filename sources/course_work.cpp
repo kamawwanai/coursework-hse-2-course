@@ -3,11 +3,18 @@
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
 
+//ИСПОЛЬЗУЕМ МОЩНУЮ БИБЛИОТЕКУ ДЛЯ РАБОТЫ С МАТРИЦАМИ GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <array>
 #include <iostream>
 #include <type_traits>
 
 #include "shader.hpp"
+
+using glm::vec3;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -43,18 +50,56 @@ auto main() -> int {
 
   // ШЕЙДЕРЫ
   // ----------
+  glEnable(GL_DEPTH_TEST); // включить тестирование глубины
+  // ----------
   // создание и компиляция шейдеров
   Shader ourShader("../static/shaders/shader.vs",
                    "../static/shaders/shader.fs");
 
   // вершины квадрата
-  std::array<float, 32> vertices = {
-      // координаты (x,y,z)          // цвета (r,g,b)       // координаты
-      // текстур (s,t)
-      0.5F, 0.5F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F,  
-      0.5F,  -0.5F, 0.0F, 0.0F, 1.0F, 0.0F, 1.0F, 0.0F,
-      -0.5F,  -0.5F,  0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F,
-      -0.5F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F
+  std::array<float, 180> vertices = {
+      // координаты (x,y,z)      // координаты текстур (s,t)
+    -0.5F, -0.5F, -0.5F,  0.0F, 0.0F,
+     0.5F, -0.5F, -0.5F,  1.0F, 0.0F,
+     0.5F,  0.5F, -0.5F,  1.0F, 1.0F,
+     0.5F,  0.5F, -0.5F,  1.0F, 1.0F,
+    -0.5F,  0.5F, -0.5F,  0.0F, 1.0F,
+    -0.5F, -0.5F, -0.5F,  0.0F, 0.0F,
+
+    -0.5F, -0.5F,  0.5F,  0.0F, 0.0F,
+     0.5F, -0.5F,  0.5F,  1.0F, 0.0F,
+     0.5F,  0.5F,  0.5F,  1.0F, 1.0F,
+     0.5F,  0.5F,  0.5F,  1.0F, 1.0F,
+    -0.5F,  0.5F,  0.5F,  0.0F, 1.0F,
+    -0.5F, -0.5F,  0.5F,  0.0F, 0.0F,
+
+    -0.5F,  0.5F,  0.5F,  1.0F, 0.0F,
+    -0.5F,  0.5F, -0.5F,  1.0F, 1.0F,
+    -0.5F, -0.5F, -0.5F,  0.0F, 1.0F,
+    -0.5F, -0.5F, -0.5F,  0.0F, 1.0F,
+    -0.5F, -0.5F,  0.5F,  0.0F, 0.0F,
+    -0.5F,  0.5F,  0.5F,  1.0F, 0.0F,
+
+     0.5F,  0.5F,  0.5F,  1.0F, 0.0F,
+     0.5F,  0.5F, -0.5F,  1.0F, 1.0F,
+     0.5F, -0.5F, -0.5F,  0.0F, 1.0F,
+     0.5F, -0.5F, -0.5F,  0.0F, 1.0F,
+     0.5F, -0.5F,  0.5F,  0.0F, 0.0F,
+     0.5F,  0.5F,  0.5F,  1.0F, 0.0F,
+
+    -0.5F, -0.5F, -0.5F,  0.0F, 1.0F,
+     0.5F, -0.5F, -0.5F,  1.0F, 1.0F,
+     0.5F, -0.5F,  0.5F,  1.0F, 0.0F,
+     0.5F, -0.5F,  0.5F,  1.0F, 0.0F,
+    -0.5F, -0.5F,  0.5F,  0.0F, 0.0F,
+    -0.5F, -0.5F, -0.5F,  0.0F, 1.0F,
+
+    -0.5F,  0.5F, -0.5F,  0.0F, 1.0F,
+     0.5F,  0.5F, -0.5F,  1.0F, 1.0F,
+     0.5F,  0.5F,  0.5F,  1.0F, 0.0F,
+     0.5F,  0.5F,  0.5F,  1.0F, 0.0F,
+    -0.5F,  0.5F,  0.5F,  0.0F, 0.0F,
+    -0.5F,  0.5F, -0.5F,  0.0F, 1.0F
   };
 
   std::array<unsigned int, 6> indices = {  
@@ -82,18 +127,18 @@ auto main() -> int {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_STATIC_DRAW);
 
   // Настройка атрибутов вершин
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), nullptr);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);
   glEnableVertexAttribArray(0);
 
-  // Настройка атрибутов цветов
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        reinterpret_cast<void*>(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  // // Настройка атрибутов цветов
+  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  //                       reinterpret_cast<void*>(3 * sizeof(float)));
+  // glEnableVertexAttribArray(1);
 
   // Настройка атрибутов вершин
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        reinterpret_cast<void*>(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        reinterpret_cast<void*>(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
   // Создание текстуры
   unsigned int texture;
@@ -126,6 +171,9 @@ auto main() -> int {
   // освободим память изображений
   stbi_image_free(data);
 
+  ourShader.use(); 
+  ourShader.setInt("texture1", 0);
+
   // ЦИКЛ РЕНДЕРИНГА
   // цикл нам нужен для того, чтобы окно не закрылось без пользователя
   // -----------
@@ -134,16 +182,39 @@ auto main() -> int {
 
     processInput(window);
 
+    // РЕНДЕРИНГ ЭКРАНА
+    glClearColor(0.2F, 0.3F, 0.3F, 1.0F); // цвет экрана
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // АКТИВИРУЕМ ШЕЙДЕРЫ
+    ourShader.use(); 
+    
+    // ПЕРЕМЕЩЕНИЕ
+    glm::mat4 model = glm::mat4(1.0F); // это матрица модели - наша трансформация
+    glm::mat4 view = glm::mat4(1.0F); // камера
+    glm::mat4 projection = glm::mat4(1.0F); // проекция
+
+    // переводим матрицу преобразования на нужный нам вектор
+    // model = glm::translate(model, glm::vec3(0.25F, 0.25F, 0.0F));
+
+    // постоянный поворот на 50 градусов по (0.5,1,0)
+    model = glm::rotate(model, static_cast<float>(glfwGetTime()) * glm::radians(50.0F), glm::vec3(0.5F, 1.0F, 0.0F));
+
+    // куда расположем камеру
+    view = glm::translate(view, glm::vec3(0.0F,0.0F,-3.0F));
+
+    // используем переспективную проекцию
+    // угол обзора - соотношение сторон сцены - ближайшая усеченная - дальнаяя усеченная
+    projection =  glm::perspective(glm::radians(45.0F), static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), 0.1F, 300.0F);
+
+    // ПЕРЕДАЧА МАТРИЦ ПРЕОБРАЗОВАНИЯ ШЕЙДЕРУ
+    ourShader.setMat4("model", model);
+    ourShader.setMat4("view", view);
+    ourShader.setMat4("projection", projection);
+
     // РЕНДЕРИНГ
-    glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // РИСУЕМ ТРЕУГОЛЬНИК
-
-    ourShader.use();
-    glBindTexture(GL_TEXTURE_2D, texture);
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // ОБМЕН БУФФЕРОВ И СПРАШИВАЕМ ПОЛЬЗОВАТЕЛЯ О ВВОДЕ-ВЫВОДЕ (кнопки, мышка и
     // т. д.)
