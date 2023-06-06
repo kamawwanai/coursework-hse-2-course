@@ -19,10 +19,18 @@ deps += dependency('glfw3',
 deps += dependency('glad')
 deps += dependency('glm')
 deps += dependency('stb_image')
+deps += dependency('nlohmann_json')
 
 sources = []
 sources += './sources/course_work.cpp'
-# sources += './sources/shader.cpp'
+sources += './sources/VBO.cpp'
+sources += './sources/VAO.cpp'
+sources += './sources/EBO.cpp'
+sources += './sources/shader.cpp'
+sources += './sources/texture.cpp'
+sources += './sources/camera.cpp'
+sources += './sources/mesh.cpp'
+sources += './sources/model.cpp'
 
 headers = [include_directories('./sources')]
 

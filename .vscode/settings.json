@@ -5,4 +5,5 @@
         "-background-index",
         "-compile-commands-dir=build"
     ],
+    "terminal.integrated.scrollback": 1000000000,
 }
