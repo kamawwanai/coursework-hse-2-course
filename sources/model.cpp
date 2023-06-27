@@ -294,14 +294,13 @@ auto Model::groupFloatsVec4(std::vector<float> floatVec)
 }
 
 void Model::changePos(float dt) {
+    const float sinPsi = sin(rotation.z);
+
     // Вычисляем ускорения, действующие на модель
     glm::vec3 acceleration{0.0F, 0.0F, 0.0F};
-    acceleration.x = (T - Fx) / m;
+    acceleration.x = T / m;
     acceleration.y = (Fy - m * g) / m;
-    acceleration.z = (Mz - rotation.x * velocity.y * velocity.z * (Iy - Iz) +
-                      rotation.y * velocity.x * velocity.z * (Ix - Iz) -
-                      rotation.z * velocity.x * velocity.y * (Ix - Iy)) /
-                     Iz;
+    acceleration.z = (Mz - l * m * g * sinPsi) / Iz;
 
     // Обновляем скорость и позицию модели
     velocity += acceleration * dt;
@@ -309,12 +308,8 @@ void Model::changePos(float dt) {
 
     // Обновляем углы поворота модели
     glm::vec3 angularAcceleration{0.0F, 0.0F, 0.0F};
-    angularAcceleration.x =
-        (rotation.y * velocity.z - rotation.z * velocity.y) / Ix;
-    angularAcceleration.y =
-        (rotation.z * velocity.x - rotation.x * velocity.z) / Iy;
     angularAcceleration.z =
-        (rotation.x * velocity.y - rotation.y * velocity.x) / Iz;
+        (-rotation.z * velocity.y + rotation.y * velocity.z) / Iy;
 
     rotation += angularAcceleration * dt;
 
@@ -335,6 +330,7 @@ void Model::changePos(float dt) {
 
 void Model::userInput(GLFWwindow* window) {
     const float speed = 0.1F;
+
     // Проверяем, нажата ли клавиша W
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         Fy += speed;
@@ -355,7 +351,24 @@ void Model::userInput(GLFWwindow* window) {
         Mz += speed;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        position.y += speed;
+    // Проверяем, нажата ли клавиша Q
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        rotation.y += speed;
     }
+
+    // Проверяем, нажата ли клавиша E
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        rotation.y -= speed;
+    }
+
+    // Проверяем, нажата ли клавиша Пробел
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        position.y += 5.0F;
+    }
+
+    // Ограничиваем значения Fy и Mz
+    const float max_fy = 5000.0F;
+    const float max_mz = 1000.0F;
+    Fy = glm::clamp(Fy, -max_fy, max_fy);
+    Mz = glm::clamp(Mz, -max_mz, max_mz);
 }
