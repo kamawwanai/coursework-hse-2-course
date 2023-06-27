@@ -1,6 +1,8 @@
 #include "model.hpp"
 #include "skybox.hpp"
 
+#include <thread>
+
 using std::string;
 
 const unsigned int width = 800;
@@ -72,21 +74,14 @@ auto main() -> int {
     // Load in models
     Model model(modelPath);
 
-    // Variables to create periodic event for FPS displaying
     float prevTime = 0.0F;
     float crntTime = 0.0F;
     float timeDiff;
-    // Keeps track of the amount of frames in timeDiff
     unsigned int counter = 0;
 
-    // Use this to disable VSync (not advized)
-    // glfwSwapInterval(0);
-
     Skybox skybox;
-    // Create VAO, VBO, and EBO for the skybox
-    skybox.intializeArrayBufferObjects();
 
-    // Creates the cubemap texture object
+    skybox.intializeArrayBufferObjects();
     skybox.createTexture();
 
     // Main while loop
@@ -129,7 +124,6 @@ auto main() -> int {
         // Since the cubemap will always have a depth of 1.0, we need that equal
         // sign so it doesn't get discarded
         glDepthFunc(GL_LEQUAL);
-        model.draw(shaderProgram, camera);
 
         camera.position = model.position;
         camera.position.x -= 59.F;
@@ -163,6 +157,7 @@ auto main() -> int {
         glfwSwapBuffers(window);
         // Take care of all GLFW events
         glfwPollEvents();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     // Delete all the objects we've created

@@ -1,5 +1,6 @@
 #include "model.hpp"
 #include <cstdint>
+#include "GLFW/glfw3.h"
 #include "glm/fwd.hpp"
 
 Model::Model(const std::string& fileGLTF) {
@@ -333,12 +334,28 @@ void Model::changePos(float dt) {
 }
 
 void Model::userInput(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        // Поворот направо при нажатии клавиши Right Arrow
-        rotation.y += 0.1F;  // увеличения угла поворота
+    const float speed = 0.1F;
+    // Проверяем, нажата ли клавиша W
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        Fy += speed;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-        // Поворот налево при нажатии клавиши Left Arrow
-        rotation.y -= 0.1F; // уменьшения угла поворота
+
+    // Проверяем, нажата ли клавиша S
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        Fy -= speed;
+    }
+
+    // Проверяем, нажата ли клавиша D
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        Mz -= speed;
+    }
+
+    // Проверяем, нажата ли клавиша A
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        Mz += speed;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        position.y += speed;
     }
 }
