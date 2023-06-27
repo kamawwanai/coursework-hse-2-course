@@ -73,9 +73,9 @@ auto main() -> int {
     Model model(modelPath);
 
     // Variables to create periodic event for FPS displaying
-    double prevTime = 0.0;
-    double crntTime = 0.0;
-    double timeDiff;
+    float prevTime = 0.0F;
+    float crntTime = 0.0F;
+    float timeDiff;
     // Keeps track of the amount of frames in timeDiff
     unsigned int counter = 0;
 
@@ -92,14 +92,15 @@ auto main() -> int {
     // Main while loop
     while (glfwWindowShouldClose(window) == 0) {
         // Updates counter and times
-        crntTime = glfwGetTime();
+        crntTime = static_cast<float>(glfwGetTime());
         timeDiff = crntTime - prevTime;
         counter++;
 
         if (timeDiff >= 1.0 / 30.0) {
             // Creates new title
             std::string FPS = std::to_string((1.0 / timeDiff) * counter);
-            std::string ms = std::to_string((timeDiff / counter) * 1000);
+            std::string ms =
+                std::to_string((timeDiff / static_cast<float>(counter)) * 1000);
             std::string newTitle =
                 "COURSEWORK - " + FPS + "FPS / " + ms + "ms";  // NOLINT
             glfwSetWindowTitle(window, newTitle.c_str());
@@ -116,15 +117,23 @@ auto main() -> int {
 
         // Handles camera inputs (delete this if you have disabled VSync)
         camera.userInput(window);
-        // Updates and exports the camera matrix to the Vertex Shader
-        camera.updateCameraMatrix(45.0F, 0.1F, 300.0F);
+        model.userInput(window);
+
+        model.changePos(timeDiff);
 
         // Draw the normal model
         model.draw(shaderProgram, camera);
 
+        camera.updateCameraMatrix(45.0F, 0.1F, 300.0F);
+
         // Since the cubemap will always have a depth of 1.0, we need that equal
         // sign so it doesn't get discarded
         glDepthFunc(GL_LEQUAL);
+        model.draw(shaderProgram, camera);
+
+        camera.position = model.position;
+        camera.position.x -= 59.F;
+        camera.position.y += 10.F;
 
         skyboxShader.use();
         glm::mat4 view = glm::mat4(1.0F);

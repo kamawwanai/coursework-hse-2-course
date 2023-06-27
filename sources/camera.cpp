@@ -26,32 +26,6 @@ void Camera::exportMatrix(Shader& shader, const std::string& uniform) {
 }
 
 void Camera::userInput(GLFWwindow* window) {
-    // ввод с клавиатуры
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        position += speedMovement * target;
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        position +=
-            speedMovement * -glm::normalize(glm::cross(target, worldUp));
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        position += speedMovement * -target;
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        position += speedMovement * glm::normalize(glm::cross(target, worldUp));
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        position += speedMovement * worldUp;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
-        position += speedMovement * -worldUp;
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        speedMovement = 0.4F;
-    } else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE) {
-        speedMovement = 0.1F;
-    }
-
     // ввод мышки
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         // спрятать курсор

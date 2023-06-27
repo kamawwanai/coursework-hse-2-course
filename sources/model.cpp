@@ -149,8 +149,10 @@ auto Model::getFloats(json accessor) -> std::vector<float> {
     // Переберать все байты в данных в нужном месте
     unsigned int beginningOfData = byteOffset + accByteOffset;
     unsigned int lengthOfData = count * 4 * numPerVert;
-    for (unsigned int i = beginningOfData; i < beginningOfData + lengthOfData; i) { // NOLINT
-        unsigned char bytes[] = {binData[i++], binData[i++], binData[i++], binData[i++]}; // NOLINT
+    for (unsigned int i = beginningOfData; i < beginningOfData + lengthOfData;
+         i) {                                                 // NOLINT
+        unsigned char bytes[] = {binData[i++], binData[i++],  // NOLINT
+                                 binData[i++], binData[i++]};
         float value;
         std::memcpy(&value, bytes, sizeof(float));
         floatVec.push_back(value);
@@ -173,24 +175,28 @@ auto Model::getIndices(json accessor) -> std::vector<GLuint> {
 
     unsigned int beginningOfData = byteOffset + accByteOffset;
     if (componentType == 5125) {
-        for (unsigned int i = beginningOfData; i < byteOffset + accByteOffset + count * 4; i) { //NOLINT
-            unsigned char bytes[] = { binData[i++], binData[i++], binData[i++], binData[i++] }; // NOLINT
+        for (unsigned int i = beginningOfData;
+             i < byteOffset + accByteOffset + count * 4; i) {     // NOLINT
+            unsigned char bytes[] = {binData[i++], binData[i++],  // NOLINT
+                                     binData[i++], binData[i++]};
             unsigned int value;
             std::memcpy(&value, bytes, sizeof(unsigned int));
             indices.push_back(static_cast<GLuint>(value));
         }
     } else if (componentType == 5123) {
-        for (unsigned int i = beginningOfData; i < byteOffset + accByteOffset + count * 2; i) { //NOLINT
-            unsigned char bytes[] = { binData[i++], binData[i++] };; //NOLINT
-            unsigned short value; //NOLINT
-            std::memcpy(&value, bytes, sizeof(unsigned short)); //NOLINT
+        for (unsigned int i = beginningOfData;
+             i < byteOffset + accByteOffset + count * 2; i) {      // NOLINT
+            unsigned char bytes[] = {binData[i++], binData[i++]};  // NOLINT
+            unsigned short value;                                  // NOLINT
+            std::memcpy(&value, bytes, sizeof(unsigned short));    // NOLINT
             indices.push_back(static_cast<GLuint>(value));
         }
     } else if (componentType == 5122) {
-        for (unsigned int i = beginningOfData; i < byteOffset + accByteOffset + count * 2; i) { //NOLINT
-            unsigned char bytes[] = { binData[i++], binData[i++] }; //NOLINT
-            short value; //NOLINT
-            std::memcpy(&value, bytes, sizeof(short)); //NOLINT
+        for (unsigned int i = beginningOfData;
+             i < byteOffset + accByteOffset + count * 2; i) {      // NOLINT
+            unsigned char bytes[] = {binData[i++], binData[i++]};  // NOLINT
+            short value;                                           // NOLINT
+            std::memcpy(&value, bytes, sizeof(short));             // NOLINT
             indices.push_back(static_cast<GLuint>(value));
         }
     }
@@ -284,4 +290,55 @@ auto Model::groupFloatsVec4(std::vector<float> floatVec)
                              floatVec[i++], floatVec[i++]);
     }
     return vectors;
+}
+
+void Model::changePos(float dt) {
+    // Вычисляем ускорения, действующие на модель
+    glm::vec3 acceleration{0.0F, 0.0F, 0.0F};
+    acceleration.x = (T - Fx) / m;
+    acceleration.y = (Fy - m * g) / m;
+    acceleration.z = (Mz - rotation.x * velocity.y * velocity.z * (Iy - Iz) +
+                      rotation.y * velocity.x * velocity.z * (Ix - Iz) -
+                      rotation.z * velocity.x * velocity.y * (Ix - Iy)) /
+                     Iz;
+
+    // Обновляем скорость и позицию модели
+    velocity += acceleration * dt;
+    position += velocity * dt;
+
+    // Обновляем углы поворота модели
+    glm::vec3 angularAcceleration{0.0F, 0.0F, 0.0F};
+    angularAcceleration.x =
+        (rotation.y * velocity.z - rotation.z * velocity.y) / Ix;
+    angularAcceleration.y =
+        (rotation.z * velocity.x - rotation.x * velocity.z) / Iy;
+    angularAcceleration.z =
+        (rotation.x * velocity.y - rotation.y * velocity.x) / Iz;
+
+    rotation += angularAcceleration * dt;
+
+    // Обновляем матрицу трансформации модели
+    glm::mat4 modelMatrix{1.0F};
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = modelMatrix * glm::toMat4(glm::quat(rotation));
+
+    // Обновляем матрицы трансформации всех мешей
+    for (size_t i = 0; i < meshes.size(); ++i) {
+        matricesMeshes[i] =
+            modelMatrix *
+            glm::translate(glm::mat4(1.0F), translationsMeshes[i]) *
+            glm::toMat4(rotationsMeshes[i]) *
+            glm::scale(glm::mat4(1.0F), scalesMeshes[i]);
+    }
+}
+
+void Model::userInput(GLFWwindow* window) {
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        // Поворот направо при нажатии клавиши Right Arrow
+        rotation.y += 0.1F;  // увеличения угла поворота
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+        // Поворот налево при нажатии клавиши Left Arrow
+        rotation.y -= 0.1F; // уменьшения угла поворота
+    }
 }

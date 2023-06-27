@@ -16,7 +16,41 @@ class Model {
 
     void draw(Shader& shader, Camera& camera);
 
+    // текущие координаты центра тяжести судна в глобальной системе координат
+    glm::vec3 position = glm::vec3{0.0F, 0.0F, 0.0F};
+    // текущие скорости в трех измерениях
+    glm::vec3 velocity{0.0F, 0.0F, 0.0F};
+    // текущие углы поворота вокруг осей x, y и z
+    glm::vec3 rotation{0.0F, 0.0F, 0.0F};
+
+    void changePos(float dt);
+
+    void userInput(GLFWwindow* window);
+
    private:
+    // текущий угол поворота судна вокруг вертикальной оси
+    float psi = 0.0F;
+    // масса судна
+    float m = 15.5F;
+    // ускорение свободного падения
+    float g = 9.81F;
+    // продольная координата центра тяжести в связанной системе
+    // координат
+    float l = 0.0F;
+    // начальное значение горизонтальной аэродинамической силы
+    float Fx = 0.0F; 
+    // вертикальная аэродинамическая сила
+    float Fy = 0.0F;
+    // продольный аэродинамический момент
+    float Mz = 0.0F;
+    // продольная сила, действующая на судно
+    float T = 0.0F;
+
+    // моменты инерции судна вокруг осей
+    float Ix = 1.0F;
+    float Iy = 1.0F;
+    float Iz = 1.0F;
+
     const char* fileGLTF;
     std::vector<unsigned char> binData;
     json JSON;

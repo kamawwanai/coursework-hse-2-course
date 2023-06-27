@@ -32,6 +32,8 @@ sources += './sources/camera.cpp'
 sources += './sources/mesh.cpp'
 sources += './sources/model.cpp'
 sources += './sources/skybox.cpp'
+sources += './sources/aerodyn.cpp'
+sources += './sources/rigidbody.cpp'
 
 headers = [include_directories('./sources')]
 
